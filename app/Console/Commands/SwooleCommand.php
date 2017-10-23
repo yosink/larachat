@@ -44,6 +44,10 @@ class SwooleCommand extends Command
         switch ($action = $this->argument('action')) {
             case 'start':
                 $this->start();
+                break;
+            case 'stop':
+                $this->shutdown();
+                break;
         }
     }
 
@@ -54,5 +58,10 @@ class SwooleCommand extends Command
         $this->serv->on('open', [$handler, 'onOpen']);
         $this->serv->on('message', [$handler, 'onMessage']);
         $this->serv->start();
+    }
+
+    protected function shutdown()
+    {
+        $this->serv->shutdown();
     }
 }
