@@ -8,24 +8,7 @@
         <title>Laravel</title>
     </head>
     <body>
-        <div id="msg"></div>
-        <input type="text" name="" id="text">
-        <input type="submit" value="send" onclick="song()">
-        <script>
-            var msg = document.getElementById('msg');
-            var ws = new WebSocket('ws://0.0.0.0:9501')
-            ws.onopen = function (event) {
-                msg.innerHTML = ws.readyState;
-            };
-            ws.onmessage = function(e){
-                var data = e.data;
-                console.log(data);
-            };
-            function song() {
-                var text = document.getElementById('text').value;
-                document.getElementById('text').value = '';
-                ws.send(text);
-            }
-        </script>
+        <div id="app"></div>
+        <script src="js/main.js"></script>
     </body>
 </html>
