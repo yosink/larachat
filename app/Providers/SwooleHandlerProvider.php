@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Handlers\SwooleHandler;
+use App\Services\RedisService;
 use Illuminate\Support\ServiceProvider;
 
 class SwooleHandlerProvider extends ServiceProvider
@@ -25,7 +26,7 @@ class SwooleHandlerProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('swoolehandler', function($app) {
-           return new SwooleHandler();
+           return new SwooleHandler(new RedisService);
         });
     }
 }

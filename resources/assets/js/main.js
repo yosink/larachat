@@ -13,7 +13,7 @@ Vue.prototype.random = n => Math.floor(n * Math.random());
 
 const store = new Vuex.Store({
     state: {
-        name: '',
+        name: 'me',
         // avatarUrl: `https://icdn.microzz.com/20170426_vue_chat/icon-avatar${Vue.prototype.random(21)}.svg`,
         avatarUrl: `http://omratag7g.bkt.clouddn.com/icon-avatar${Vue.prototype.random(21)}.svg`,
         addr: '未知',

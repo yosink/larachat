@@ -118,8 +118,11 @@ export default {
           return;
         }
 
-        Socket.send(JSON.parse({cmd: 'login', name:this.$store.state.name}));
+        Socket.send(JSON.stringify({name:this.$store.state.name,cmd:'login'}));
     };
+    Socket.onmessage = e => {
+        console.log(e.data);
+    }
 
     this.oContent.scrollTop = this.oContent.scrollHeight;
   },
