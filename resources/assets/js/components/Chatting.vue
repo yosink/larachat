@@ -79,6 +79,7 @@
 </template>
 
 <script>
+    import Socket from '../utils/socket'
 export default {
   name: 'chatting',
   data() {
@@ -107,25 +108,26 @@ export default {
       return this.$store.state.avatarUrl;
     }
   },
-  beforeRouteEnter(to, from, next) {
-    if (!localStorage.name) {
-      next('/')
-    } else {
-      next();
-    }
-  },
   mounted() {
-    setInterval(() => this.isRedAI = !this.isRedAI, 2500);
-
     this.oContent = document.querySelector('.chatting-content');
     this.oContent.scrollTop = this.oContent.scrollHeight;
     this.oTextarea = document.querySelector('textarea');
+    Socket.onopen = e => {
+      console.log('connect success')
+        if (!this.$store.state.name) {
+          return;
+        }
+
+        Socket.send(JSON.parse({cmd: 'login', name:this.$store.state.name}));
+    };
 
     this.oContent.scrollTop = this.oContent.scrollHeight;
   },
   methods: {
     send() {
       this.isShowEmoji = false;
+
+
       if (this.inputContent === '') {
         return;
       } else {

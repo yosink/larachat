@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import axios from 'axios'
+
 import moment from 'moment';
 import Vuex from 'vuex'
 Vue.use(Vuex)

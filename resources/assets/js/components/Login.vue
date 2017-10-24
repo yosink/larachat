@@ -18,6 +18,8 @@
 
 <script>
 import About from './About.vue';
+import Cookie from 'js-cookie'
+import Http from '../http'
 
 export default {
   name: 'login',
@@ -26,7 +28,8 @@ export default {
   },
   data() {
     return {
-      name: ''
+      name: '',
+      avatar: ''
     }
   },
   computed: {
@@ -39,9 +42,11 @@ export default {
       if (this.name === '') {
         return;
       }
-      this.$store.commit('changeName', this.name);
-      localStorage.name = this.name;
-      this.$router.push('Chatting');
+
+     this.$store.commit('changeName', this.name);
+     Cookie.set('name', this.name);
+
+      this.$router.push({path: '/'});
     },
     showAbout() {
       this.$store.commit('showAbout', true);
