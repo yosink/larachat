@@ -12,8 +12,14 @@
         <div class="chatting-title">
           <h2><i class="icon-group"></i>群聊</h2>
         </div>
-        <div class="chatting-menu">
-          <i @click="$router.push('/')" class="icon-menu"></i>
+        <div class="chatting-menu position">
+          <i  class="icon-menu" @click="showLi = !showLi"></i>
+          <ul v-show="showLi">
+          <li>个人信息</li>
+          <li>查看在线列表</li>
+          <li>查看历史消息</li>
+          <li>退出</li>
+            </ul>
         </div>
 
       </div>
@@ -69,7 +75,7 @@
         <div class="emoji">
           <i @click="showEmoji(isShowEmoji=!isShowEmoji);" class="icon-emoji"></i>
         </div>
-        <textarea @keyup.enter="send" @input="newLine" ref="textarea" v-model.trim="inputContent" placeholder="左上角还有智能机器人哦"></textarea>
+        <textarea @keyup.enter="send" @input="newLine" ref="textarea" v-model.trim="inputContent"></textarea>
         <button @click="send">发送</button>
       </div>
 
@@ -92,7 +98,8 @@ export default {
       oTextarea: {},
       emojis: ['😂', '🙏', '😄', '😏', '😇', '😅', '😌', '😘', '😍', '🤓', '😜', '😎', '😊', '😳', '🙄', '😱', '😒', '😔', '😷', '👿', '🤗', '😩', '😤', '😣', '😰', '😴', '😬', '😭', '👻', '👍', '✌️', '👉', '👀', '🐶', '🐷', '😹', '⚡️', '🔥', '🌈', '🍏', '⚽️', '❤️', '🇨🇳'],
       isShowEmoji: false,
-      isRedAI: false
+      isRedAI: false,
+        showLi: false
     }
   },
   watch: {
@@ -113,38 +120,51 @@ export default {
     this.oContent.scrollTop = this.oContent.scrollHeight;
     this.oTextarea = document.querySelector('textarea');
     Socket.onopen = e => {
-      console.log('connect success')
+        console.log(this.$store.state.name);
         if (!this.$store.state.name) {
           return;
         }
 
-        Socket.send(JSON.stringify({name:this.$store.state.name,cmd:'login'}));
+        Socket.send(JSON.stringify({"name":this.$store.state.name,"cmd":"login"}));
     };
     Socket.onmessage = e => {
-        console.log(e.data);
-    }
+        let data = JSON.parse(e.data);
+        console.log(data);
+        if (data.cmd === 'newUser') {
+            let oOnline = document.createElement('div');
+            oOnline.className = 'online';
+            oOnline.innerText = data.name + '上线了';
+            this.oContent.appendChild(oOnline);
+            this.oContent.scrollTop = this.oContent.scrollHeight;
+        }
+
+    };
 
     this.oContent.scrollTop = this.oContent.scrollHeight;
   },
   methods: {
+      change_showLi() {
+        this.showLi = true;
+      },
     send() {
       this.isShowEmoji = false;
-
 
       if (this.inputContent === '') {
         return;
       } else {
-        this.msgs.push({
-          date: this.moment().format('YYYY-MM-DD HH:mm:ss'),
-          loc: localStorage.addr,
-          from: `${localStorage.name}`,
-          content: this.inputContent,
-          self: true,
-          avatarUrl: this.avatarUrl
-        });
+          let send_data = {
+            date: this.moment().format('YYYY-MM-DD HH:mm:ss'),
+              loc:localStorage.addr,
+              from: `${localStorage.name}`,
+              content: this.inputContent,
+              chanel: 0,
+              cmd: 'message'
+          };
+          Socket.send(Json.stringify(send_data));
+        this.msgs.push(send_data);
         this.inputContent = '';
         setTimeout(() => this.oContent.scrollTop = this.oContent.scrollHeight, 0);
-      };
+      }
     },
 
     showEmoji(flag) {
@@ -186,7 +206,26 @@ export default {
 
 <style lang="scss" scoped>
   $blue: #2196f3;
-
+    .position{
+        position: relative;
+        ul {
+            position: absolute;
+            top: 40px;
+            right: -15px;
+            width: 100px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 5px;
+            li {
+                line-height: 30px;
+                padding: 3px 10px;
+                font-size: 12px;
+                cursor: pointer;
+                &:hover {
+                    color: rgba(255,255,255,0.8)
+                }
+            }
+        }
+    }
   .chatting {
     display: flex;
     flex-direction: column;

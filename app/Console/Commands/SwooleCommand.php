@@ -57,6 +57,9 @@ class SwooleCommand extends Command
         $handler = App::make('swoolehandler');
         $this->serv->on('open', [$handler, 'onOpen']);
         $this->serv->on('message', [$handler, 'onMessage']);
+        $this->serv->on('close', [$handler, 'onClose']);
+        $this->serv->on('task', [$handler, 'onTask']);
+        $this->serv->on('finish', [$handler, 'onFinish']);
         $this->serv->start();
     }
 

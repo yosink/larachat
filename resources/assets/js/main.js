@@ -34,6 +34,17 @@ const store = new Vuex.Store({
 })
 import App from './App'
 import router from './route'
+import Cookies from 'js-cookie'
+router.beforeEach((to, from,next) => {
+    if (to.path !== '/login') {
+        if(! Cookies.get('name')){
+            next('/login')
+        }else{
+            next()
+        }
+    }
+    next()
+})
 
 const app = new Vue({
     el: '#app',
