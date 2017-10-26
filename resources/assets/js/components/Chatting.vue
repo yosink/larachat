@@ -54,9 +54,6 @@
 
         </div>
 
-        <!-- <div class="online">
-          microzz上线了
-        </div> -->
 
       </div>
 
@@ -93,9 +90,7 @@ export default {
   name: 'chatting',
   data() {
     return {
-      msgs: localStorage.msgs_group && JSON.parse(localStorage.msgs_group) || [
-        // { date: '2015-11-09 09:57:08', loc: '江西省南昌市', from: 'microzz', avatarUrl: `https://icdn.microzz.com/20170426_vue_chat/icon-avatar${this.random(11)}.svg`, content: 'test', self: false}
-      ],
+      msgs: localStorage.msgs_group && JSON.parse(localStorage.msgs_group) || [],
       inputContent: '',
       oContent: {},
       oTextarea: {},
@@ -221,7 +216,6 @@ export default {
       setTimeout(() => this.oTextarea.scrollTop = this.oTextarea.scrollHeight, 0);
     },
       logout(){
-//          console.log(this.ws);
           this.ws.send(JSON.stringify({name:this.name,cmd:'logout'}));
       },
       test(){

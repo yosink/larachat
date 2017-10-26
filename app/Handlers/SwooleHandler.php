@@ -25,9 +25,7 @@ class SwooleHandler
     public function onMessage(\swoole_websocket_server $server, $frame)
     {
         echo "receive from {$frame->fd}:{$frame->data},opcode:{$frame->opcode},fin:{$frame->finish}\n";
-        var_dump( json_decode($frame->data));
         $info = json_decode($frame->data);
-//        $server->push($frame->fd, $info->name);
         $message = [];
         switch ($info->cmd) {
             case 'login':
@@ -36,9 +34,9 @@ class SwooleHandler
                 $message['name'] = $info->name;
                 $message['cmd'] = 'newUser';
                 foreach ($this->redis->getOnlineUsers() as $other) {
-////                    if ($other != $frame->fd){
+                    if ($other != $frame->fd){
                     $server->push($other, json_encode($message));
-////                    }
+                    }
                 }
                 break;
             case 'message':
@@ -47,10 +45,7 @@ class SwooleHandler
                     $server->push($frame->fd, json_encode(['code' => 102, 'msg' => '消息内容不能超过1K']));
                     return;
                 }
-                echo isset($this->lastSendTime[$frame->fd]) ? $frame->fd.'上次登录时间：'.$this->lastSendTime[$frame->fd] : $frame->fd.'上次登录时间还没有被记录';
-                echo "\n";
                 if (isset($this->lastSendTime[$frame->fd]) && $this->lastSendTime[$frame->fd] > (time() - self::MESSAGE_INTERVAL_LIMIT)) {
-                    echo 'in'."\n";
                     $server->push($frame->fd, json_encode(['code' => 104, 'msg' => self::MESSAGE_INTERVAL_LIMIT . 's以后才能再次发送']));
                     return;
                 }
@@ -96,7 +91,6 @@ class SwooleHandler
                     if (empty($req['msg'])) {
                         $req['msg'] = '';
                     }
-                    var_dump($req) ;
                         // 存入mysql
                     $this->redis->addHistroy($req['fd'], $req['msg']);
                     break;
