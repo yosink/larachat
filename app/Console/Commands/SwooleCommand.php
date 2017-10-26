@@ -53,7 +53,9 @@ class SwooleCommand extends Command
 
     protected function start(){
         $this->serv = new \swoole_websocket_server('0.0.0.0', 9501);
-//        $this->serv->set(array());     // 具体参考文档
+        $this->serv->set(array(
+            'task_worker_num' => 10
+        ));     // 具体参考文档
         $handler = App::make('swoolehandler');
         $this->serv->on('open', [$handler, 'onOpen']);
         $this->serv->on('message', [$handler, 'onMessage']);

@@ -9,6 +9,10 @@ class TestController extends Controller
 {
     public function index()
     {
-        echo '333222';
+        $arr = ['id'=>1,'name'=>'name'];
+        echo json_encode($arr);
+        echo '<br/>';
+        echo serialize($arr);
+
     }
 }

@@ -15,10 +15,10 @@
         <div class="chatting-menu position">
           <i  class="icon-menu" @click="showLi = !showLi"></i>
           <ul v-show="showLi">
-          <li>个人信息</li>
+          <li @click="test()">个人信息</li>
           <li>查看在线列表</li>
           <li>查看历史消息</li>
-          <li>退出</li>
+          <li @click="logout()">退出</li>
             </ul>
         </div>
 
@@ -75,6 +75,9 @@
         <div class="emoji">
           <i @click="showEmoji(isShowEmoji=!isShowEmoji);" class="icon-emoji"></i>
         </div>
+        <div>
+        <span class="error-msg" v-text="errors"></span>
+</div>
         <textarea @keyup.enter="send" @input="newLine" ref="textarea" v-model.trim="inputContent"></textarea>
         <button @click="send">发送</button>
       </div>
@@ -85,7 +88,7 @@
 </template>
 
 <script>
-    import Socket from '../utils/socket'
+    import Cookies from 'js-cookie'
 export default {
   name: 'chatting',
   data() {
@@ -99,7 +102,9 @@ export default {
       emojis: ['😂', '🙏', '😄', '😏', '😇', '😅', '😌', '😘', '😍', '🤓', '😜', '😎', '😊', '😳', '🙄', '😱', '😒', '😔', '😷', '👿', '🤗', '😩', '😤', '😣', '😰', '😴', '😬', '😭', '👻', '👍', '✌️', '👉', '👀', '🐶', '🐷', '😹', '⚡️', '🔥', '🌈', '🍏', '⚽️', '❤️', '🇨🇳'],
       isShowEmoji: false,
       isRedAI: false,
-        showLi: false
+        showLi: false,
+        ws:{},
+        errors:''
     }
   },
   watch: {
@@ -119,25 +124,39 @@ export default {
     this.oContent = document.querySelector('.chatting-content');
     this.oContent.scrollTop = this.oContent.scrollHeight;
     this.oTextarea = document.querySelector('textarea');
-    Socket.onopen = e => {
-        console.log(this.$store.state.name);
-        if (!this.$store.state.name) {
+    this.ws = new WebSocket('ws://172.17.0.1:9501');
+    this.ws.onopen = e => {
+        if (!this.name) {
           return;
         }
-
-        Socket.send(JSON.stringify({"name":this.$store.state.name,"cmd":"login"}));
+        this.ws.send(JSON.stringify({"name":this.name,"cmd":"login"}));
     };
-    Socket.onmessage = e => {
+    this.ws.onmessage = e => {
         let data = JSON.parse(e.data);
-        console.log(data);
+        if (data.code === 102 || data.code === 104) {
+            this.errors = data.msg;
+            this.$refs.textarea.focus()
+            return;
+        }
         if (data.cmd === 'newUser') {
             let oOnline = document.createElement('div');
             oOnline.className = 'online';
             oOnline.innerText = data.name + '上线了';
             this.oContent.appendChild(oOnline);
             this.oContent.scrollTop = this.oContent.scrollHeight;
+        }else if(data.cmd === 'logout') {
+            Cookies.remove('name');
+            this.$store.commit('changeName', '');
+            this.$router.push('/login')
+        }else if(data.cmd === 'fromMsg'){
+            this.msgs.push(data);
         }
 
+    };
+    this.ws.onclose = e => {
+        console.log('连接已断开');
+        this.ws.send(JSON.stringify({cmd:'logout'}));
+        this.logout();
     };
 
     this.oContent.scrollTop = this.oContent.scrollHeight;
@@ -155,12 +174,13 @@ export default {
           let send_data = {
             date: this.moment().format('YYYY-MM-DD HH:mm:ss'),
               loc:localStorage.addr,
-              from: `${localStorage.name}`,
+              from: Cookies.get('name'),
               content: this.inputContent,
               chanel: 0,
               cmd: 'message'
           };
-          Socket.send(Json.stringify(send_data));
+          this.ws.send(JSON.stringify(send_data));
+          send_data.self = true;
         this.msgs.push(send_data);
         this.inputContent = '';
         setTimeout(() => this.oContent.scrollTop = this.oContent.scrollHeight, 0);
@@ -199,7 +219,14 @@ export default {
 
     newLine() {
       setTimeout(() => this.oTextarea.scrollTop = this.oTextarea.scrollHeight, 0);
-    }
+    },
+      logout(){
+//          console.log(this.ws);
+          this.ws.send(JSON.stringify({name:this.name,cmd:'logout'}));
+      },
+      test(){
+          console.log(Cookies.get('name'))
+      }
   }
 }
 </script>
@@ -413,6 +440,10 @@ export default {
 
         }
       }
+        .error-msg{
+            line-height: 20px;
+            color: #880000;
+        }
 
       textarea {
         flex: 1;
